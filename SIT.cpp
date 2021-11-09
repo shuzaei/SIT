@@ -396,49 +396,22 @@ namespace SIT {
     void Interpret(istream &input) {
         vector<string> s;
         string line;
-        while (getline(input, line)) s.push_back(line);
+        while (getline(input, line) && line != "?") s.push_back(line);
         Parse(s);
         Run();
     }
     void Reset() { ifPairs.clear(), variables.clear(); }
 }; // namespace SIT
 
-void RunTest() {
-    using namespace SIT;
-    ifPairs.push_back(IfPair(
-        new BinaryOperation(String("=="), new Variable(String("State")), new Leaf(String(""))),
-        new Assignment(String("State"), new Leaf(String("Read")))));
-    ifPairs.push_back(IfPair(
-        new BinaryOperation(String("=="), new Variable(String("State")), new Leaf(String("Read"))),
-        new BinaryOperation(String("or"), new Read(String("Input")),
-                            new Assignment(String("State"), new Leaf(String("Print"))))));
-    ifPairs.push_back(
-        IfPair(new BinaryOperation(String("And"),
-                                   new BinaryOperation(String("=="), new Variable(String("State")),
-                                                       new Leaf(String("Print"))),
-                                   new BinaryOperation(String("=="), new Variable(String("Input")),
-                                                       new Leaf(String("")))),
-               new Assignment(String("State"), new Leaf(String("Finish")))));
-    ifPairs.push_back(IfPair(
-        new BinaryOperation(String("=="), new Variable(String("State")), new Leaf(String("Print"))),
-        new BinaryOperation(String("or"), new Print(new Variable(String("Input"))),
-                            new Assignment(String("State"), new Leaf(String("Read"))))));
-    ifPairs.push_back(IfPair(new BinaryOperation(String("=="), new Variable(String("State")),
-                                                 new Leaf(String("Finish"))),
-                             new Erase(new Leaf(String("0")))));
-    Run();
-}
-
-void TokenizeTest() {
-    using namespace SIT;
-    vector<string> s = Tokenize("a = 1; b = 2; c = 3;");
-    for (string token : s) {
-        cout << token << endl;
-    }
-}
-
 int main(int argc, char *argv[]) {
-    (void) argc;
-    ifstream ifs(argv[1]);
-    SIT::Interpret(ifs);
+    string s = "";
+    if (argc > 1) {
+        ifstream ifs(argv[1]);
+        SIT::Interpret(ifs);
+    } else if (s == "") {
+        SIT::Interpret(cin);
+    } else {
+        stringstream ss(s);
+        SIT::Interpret(ss);
+    }
 }
