@@ -106,6 +106,23 @@ namespace SIT {
             cerr << ")";
         }
     };
+    class Sequence : public Expression {
+        public:
+        Expression *left;
+        Expression *right;
+        Sequence(Expression *left, Expression *right) { this->left = left, this->right = right; }
+        Leaf Evaluate() override {
+            left->Evaluate();
+            return right->Evaluate();
+        }
+        void Debug() override {
+            cerr << "Sequence(";
+            left->Debug();
+            cerr << ", ";
+            right->Debug();
+            cerr << ")";
+        }
+    };
     class IfPair {
         public:
         Expression *condition;
@@ -123,11 +140,11 @@ namespace SIT {
             }
         }
         void Debug() {
-            cerr << "IfPair(";
+            cerr << "    IfPair(";
             condition->Debug();
             cerr << ", ";
             body->Debug();
-            cerr << ")" << endl;
+            cerr << ")";
         }
     };
     vector<IfPair> ifPairs;
@@ -226,8 +243,13 @@ namespace SIT {
     };
 
     void Debug() {
-        for (IfPair ifPair : ifPairs) ifPair.Debug();
-        cerr << endl;
+        cerr << "{" << endl;
+        for (int i = 0; i < (int) ifPairs.size(); i++) {
+            ifPairs[i].Debug();
+            if (i != (int) ifPairs.size() - 1) cerr << ",";
+            cerr << endl;
+        }
+        cerr << "}" << endl;
     }
     bool Execute() {
         for (IfPair ifPair : ifPairs) {
@@ -237,16 +259,20 @@ namespace SIT {
         }
         return false;
     }
+    bool debug = false, failExit = false;
     void Run() {
         while (ifPairs.size() > 0) {
-            Execute();
+            bool result = Execute();
+            if (debug) Debug();
+            if (failExit && !result) break;
         }
     }
 
     vector<string> Tokenize(string input) {
         string idt = "[a-zA-Z_][a-zA-Z0-9_]*";
         string num = "[0-9]+";
-        string op = "\\+|==|\\!=|\\%|\\=|\\!|\\<|\\>|\\<=|\\>=|\\&|\\||\\^|\\(|\\)|\\,|\\?";
+        string op =
+            "\\+|==|\\!=|\\%|\\=|\\!|\\<|\\>|\\<=|\\>=|\\&\\&|\\|\\||\\^\\^|\\(|\\)|\\,|\\?";
         string str = "\\\"(\\\\.|[^\\\"])*\\\"";
         string regex = "(" + idt + ")|(" + num + ")|(" + op + ")|(" + str + ")";
         regex_t regex_compiled;
@@ -286,8 +312,7 @@ namespace SIT {
         if ((s = Find({","}, token)).first != -1) {
             vector<string> left = vector<string>(token.begin(), token.begin() + s.first);
             vector<string> right = vector<string>(token.begin() + s.first + 1, token.end());
-            return new BinaryOperation(String("Or"), TokenToExpression(left),
-                                       TokenToExpression(right));
+            return new Sequence(TokenToExpression(left), TokenToExpression(right));
         }
         // Statement
         if (token[0] == "push") {
@@ -323,7 +348,7 @@ namespace SIT {
                 TokenToExpression(vector<string>(token.begin(), token.begin() + s.first)),
                 TokenToExpression(vector<string>(token.begin() + s.first + 1, token.end())));
         }
-        if ((s = Find({"^", "xor"}, token)).first != -1) {
+        if ((s = Find({"^^", "xor"}, token)).first != -1) {
             return new BinaryOperation(
                 String("xor"),
                 TokenToExpression(vector<string>(token.begin(), token.begin() + s.first)),
@@ -383,12 +408,16 @@ namespace SIT {
         return new Variable(String(token[0]));
     }
     IfPair TokenToIfPair(vector<string> token) {
-        int s = find(token.begin(), token.end(), "?") - token.begin();
+        int s = Find({"?"}, token).first;
         return IfPair(TokenToExpression(vector<string>(token.begin(), token.begin() + s)),
                       TokenToExpression(vector<string>(token.begin() + s + 1, token.end())));
     }
     void Parse(vector<string> s) {
         for (string line : s) {
+            if (line == "#DEBUG") debug = true;
+            if (line == "#NODEBUG") debug = false;
+            if (line == "#FAILEXIT") failExit = true;
+            if (line == "#NOFAILEXIT") failExit = false;
             if (line[0] == '#') continue;
             ifPairs.push_back(TokenToIfPair(Tokenize(line)));
         }
@@ -398,6 +427,7 @@ namespace SIT {
         string line;
         while (getline(input, line) && line != "?") s.push_back(line);
         Parse(s);
+        if (debug) Debug();
         Run();
     }
     void Reset() { ifPairs.clear(), variables.clear(); }
@@ -406,8 +436,14 @@ namespace SIT {
 int main(int argc, char *argv[]) {
     string s = "";
     if (argc > 1) {
-        ifstream ifs(argv[1]);
-        SIT::Interpret(ifs);
+        if (argc == 3 && string(argv[1]) == "-d") {
+            ifstream file(argv[2]);
+            SIT::debug = true;
+            SIT::Interpret(file);
+        } else {
+            ifstream file(argv[1]);
+            SIT::Interpret(file);
+        }
     } else if (s == "") {
         SIT::Interpret(cin);
     } else {
