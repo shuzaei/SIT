@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.v": "verilog",
+        "iostream": "cpp",
+        "span": "cpp",
+        "fstream": "cpp"
+    }
+}
