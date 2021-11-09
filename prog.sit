@@ -1,5 +1,0 @@
-State=="" ? State="Read"
-State=="Read" ? read(Input), State="Print"
-State=="Print" and Input=="" ? State="Finish"
-State=="Print" ? print(Input), State="Read"
-State=="Finish" ? erase("0")
