@@ -435,15 +435,13 @@ namespace SIT {
 
 int main(int argc, char *argv[]) {
     string s = "";
-    if (argc > 1) {
-        if (argc == 3 && string(argv[1]) == "-d") {
-            ifstream file(argv[2]);
-            SIT::debug = true;
-            SIT::Interpret(file);
-        } else {
-            ifstream file(argv[1]);
-            SIT::Interpret(file);
-        }
+    if (argc == 3 && string(argv[1]) == "run") {
+        ifstream file(argv[2]);
+        SIT::Interpret(file);
+    } else if (argc == 3 && string(argv[1]) == "debug") {
+        ifstream file(argv[2]);
+        SIT::debug = true;
+        SIT::Interpret(file);
     } else if (s == "") {
         SIT::Interpret(cin);
     } else {
