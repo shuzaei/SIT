@@ -3,6 +3,7 @@
 using namespace std;
 
 namespace SIT {
+    bool debug = false, failExit = false, split = false;
     class String {
         public:
         string value;
@@ -236,7 +237,7 @@ namespace SIT {
         Read(String name) { this->name = name; }
         Leaf Evaluate() override {
             string input;
-            getline(cin, input);
+            split ? cin >> input : getline(cin, input);
             return variables[name.value] = Leaf(String(input));
         }
         void Debug() override { cerr << "Read(" << name.value << ")"; }
@@ -259,7 +260,6 @@ namespace SIT {
         }
         return false;
     }
-    bool debug = false, failExit = false;
     void Run() {
         while (ifPairs.size() > 0) {
             bool result = Execute();
@@ -418,6 +418,8 @@ namespace SIT {
             if (line == "#NODEBUG") debug = false;
             if (line == "#FAILEXIT") failExit = true;
             if (line == "#NOFAILEXIT") failExit = false;
+            if (line == "#SPLIT") split = true;
+            if (line == "#NOSPLIT") split = false;
             if (line[0] == '#') continue;
             ifPairs.push_back(TokenToIfPair(Tokenize(line)));
         }
