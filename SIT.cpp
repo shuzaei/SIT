@@ -293,7 +293,7 @@ namespace SIT {
     IfPair TokenToIfPair(vector<string> token);
     pair<int, string> Find(vector<string> key, vector<string> tokens) {
         int dep = 0;
-        for (int i = 0; i < (int) tokens.size(); i++) {
+        for (int i = (int) tokens.size() - 1; i >= 0; i--) {
             if (tokens[i] == "(") dep++;
             if (tokens[i] == ")") dep--;
             if (dep == 0) {
