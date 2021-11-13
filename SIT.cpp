@@ -376,7 +376,7 @@ namespace SIT {
             return new BinaryOperation(
                 String(s.second),
                 TokenToExpression(vector<string>(token.begin(), token.begin() + s.first)),
-                TokenToExpression(vector<string>(token.begin() + s.first + 2, token.end())));
+                TokenToExpression(vector<string>(token.begin() + s.first + 1, token.end())));
         }
         if ((s = Find({"mul", "div", "mod"}, token)).first != -1) {
             return new BinaryOperation(
