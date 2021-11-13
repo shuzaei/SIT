@@ -443,7 +443,7 @@ namespace SIT {
 }; // namespace SIT
 
 int main(int argc, char *argv[]) {
-    string s = "#SPLIT\nTrue?read(x),read(y),print(32 pow (x sub y)),pop()";
+    string s = "";
     if (argc == 3 && string(argv[1]) == "run") {
         ifstream file(argv[2]);
         SIT::Interpret(file);
