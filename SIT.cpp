@@ -64,6 +64,7 @@ namespace SIT {
             if (this->op.value == "mul") return Leaf(String(left.ToInt() * right.ToInt()));
             if (this->op.value == "div") return Leaf(String(left.ToInt() / right.ToInt()));
             if (this->op.value == "mod") return Leaf(String(left.ToInt() % right.ToInt()));
+            if (this->op.value == "pow") return Leaf(String((int) pow(left.ToInt(), right.ToInt())));
             if (this->op.value == "lt") return Leaf(String(left.ToInt() < right.ToInt()));
             if (this->op.value == "gt") return Leaf(String(left.ToInt() > right.ToInt()));
             if (this->op.value == "le") return Leaf(String(left.ToInt() <= right.ToInt()));
@@ -384,6 +385,12 @@ namespace SIT {
                 TokenToExpression(vector<string>(token.begin(), token.begin() + s.first)),
                 TokenToExpression(vector<string>(token.begin() + s.first + 1, token.end())));
         }
+        if ((s = Find({"pow"}, token)).first != -1) {
+            return new BinaryOperation(
+                String(s.second),
+                TokenToExpression(vector<string>(token.begin(), token.begin() + s.first)),
+                TokenToExpression(vector<string>(token.begin() + s.first + 1, token.end())));
+        }
         if ((s = Find({"neg", "not"}, token)).first != -1) {
             return new UnaryOperation(
                 String(s.second),
@@ -436,7 +443,7 @@ namespace SIT {
 }; // namespace SIT
 
 int main(int argc, char *argv[]) {
-    string s = "";
+    string s = "#SPLIT\nTrue?read(x),read(y),print(32 pow (x sub y)),pop()";
     if (argc == 3 && string(argv[1]) == "run") {
         ifstream file(argv[2]);
         SIT::Interpret(file);
